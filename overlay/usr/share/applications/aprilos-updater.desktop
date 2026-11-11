@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AprilOS Updater
+Name[th]=อัปเดต AprilOS
+Comment=Update AprilOS from GitHub
+Icon=system-software-update
+Exec=xfce4-terminal --hold -T "AprilOS Updater" -x sudo /usr/local/sbin/aprilos-update
+Terminal=false
+Categories=System;Settings;

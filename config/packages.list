@@ -1,0 +1,35 @@
+# แพ็กเกจที่จะติดตั้งใน AprilOS (หนึ่งบรรทัดต่อหนึ่งแพ็กเกจ, # = คอมเมนต์)
+
+# --- ระบบพื้นฐาน / live boot ---
+linux-generic
+casper
+ubuntu-standard
+sudo
+locales
+tzdata
+ca-certificates
+curl
+wget
+nano
+libnotify-bin
+network-manager
+
+# --- เดสก์ท็อป (XFCE: เบาและ build เร็ว) ---
+xorg
+xfce4
+xfce4-terminal
+xfce4-whiskermenu-plugin
+thunar
+mousepad
+lightdm
+lightdm-gtk-greeter
+network-manager-gnome
+pipewire-pulse
+wireplumber
+pavucontrol
+
+# --- ภาษาไทย ---
+fonts-thai-tlwg
+fonts-noto-core
+ibus
+ibus-libthai

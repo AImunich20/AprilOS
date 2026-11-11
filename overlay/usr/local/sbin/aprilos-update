@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# aprilos-update — อัปเดต AprilOS จาก GitHub Releases
+#
+#   aprilos-update check     ตรวจว่ามีเวอร์ชันใหม่ไหม (ไม่ต้องใช้ root)
+#   aprilos-update apply     ดาวน์โหลดและติดตั้งเวอร์ชันใหม่ (ต้องใช้ root)
+#   aprilos-update status    แสดงเวอร์ชันปัจจุบันและแหล่งอัปเดต
+#   aprilos-update auto      ใช้โดย systemd timer: check แล้ว apply ถ้า AUTO_APPLY=yes
+#
+# exit code ของ check: 0 = มีอัปเดต, 1 = ล่าสุดแล้ว, 2 = ผิดพลาด
+set -euo pipefail
+
+CONF=/etc/aprilos/update.conf
+STATE_DIR=/var/lib/aprilos-update
+LOG=/var/log/aprilos-update.log
+LOCK=/run/aprilos-update.lock
+
+[ -f "$CONF" ] && source "$CONF"
+: "${GITHUB_REPO:?ไม่ได้ตั้ง GITHUB_REPO ใน $CONF}"
+: "${INCLUDE_PRERELEASE:=no}" "${AUTO_APPLY:=no}"
+
+current_version() { cat /etc/aprilos/version 2>/dev/null || echo 0; }
+log() { echo "[$(date '+%F %T')] $*" | { [ -w "$(dirname "$LOG")" ] && tee -a "$LOG" || cat; }; }
+die() { log "ERROR: $*"; exit 2; }
+is_live() { grep -qw 'boot=casper' /proc/cmdline 2>/dev/null; }
+ver_gt() { dpkg --compare-versions "$1" gt "$2"; }
+
+# หาแท็ก release ล่าสุด → พิมพ์ชื่อแท็ก เช่น v0.2
+latest_tag() {
+    local tag
+    if [ "$INCLUDE_PRERELEASE" = "yes" ]; then
+        tag=$(curl -fsSL "https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=1" \
+              | grep -m1 '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')
+    else
+        # ใช้ redirect ของหน้า releases/latest → ไม่โดน API rate limit
+        tag=$(curl -fsSI "https://github.com/${GITHUB_REPO}/releases/latest" \
+              | tr -d '\r' | sed -nE 's|^[Ll]ocation: .*/releases/tag/(.+)$|\1|p' | tail -1)
+    fi
+    [ -n "$tag" ] || return 1
+    echo "$tag"
+}
+
+cmd_status() {
+    echo "AprilOS เวอร์ชัน : $(current_version)"
+    echo "แหล่งอัปเดต      : https://github.com/${GITHUB_REPO}"
+    echo "ติดตั้งอัตโนมัติ  : ${AUTO_APPLY}   (beta: ${INCLUDE_PRERELEASE})"
+    [ -f "$STATE_DIR/last-update" ] && echo "อัปเดตล่าสุด     : $(cat "$STATE_DIR/last-update")"
+    return 0
+}
+
+cmd_check() {
+    local tag new cur
+    tag=$(latest_tag) || die "ติดต่อ GitHub ไม่ได้ หรือยังไม่มี release ใน ${GITHUB_REPO}"
+    new=${tag#v}; cur=$(current_version)
+    if ver_gt "$new" "$cur"; then
+        echo "มีอัปเดต: $cur → $new"
+        mkdir -p /run/aprilos-update 2>/dev/null && echo "$new" > /run/aprilos-update/available 2>/dev/null || true
+        return 0
+    fi
+    echo "AprilOS $cur เป็นเวอร์ชันล่าสุดแล้ว"
+    rm -f /run/aprilos-update/available 2>/dev/null || true
+    return 1
+}
+
+cmd_apply() {
+    [ "$(id -u)" -eq 0 ] || { echo "ต้องรันด้วย sudo: sudo aprilos-update apply"; exit 2; }
+    is_live && { echo "กำลังรันแบบ Live — อัปเดตได้หลังติดตั้งลงเครื่องเท่านั้น"; exit 2; }
+
+    exec 9>"$LOCK"
+    flock -n 9 || die "มีการอัปเดตอื่นกำลังทำงานอยู่"
+
+    local tag new cur tmp src
+    tag=$(latest_tag) || die "ติดต่อ GitHub ไม่ได้"
+    new=${tag#v}; cur=$(current_version)
+    if ! ver_gt "$new" "$cur"; then echo "AprilOS $cur เป็นเวอร์ชันล่าสุดแล้ว"; return 0; fi
+
+    log "==> เริ่มอัปเดต $cur → $new (${GITHUB_REPO}@${tag})"
+    tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
+    curl -fsSL "https://github.com/${GITHUB_REPO}/archive/refs/tags/${tag}.tar.gz" -o "$tmp/src.tar.gz" \
+        || die "ดาวน์โหลด source ของ $tag ไม่สำเร็จ"
+
+    # ตรวจ checksum ถ้า release แนบไฟล์ SHA256SUMS มาด้วย
+    if curl -fsSL "https://github.com/${GITHUB_REPO}/releases/download/${tag}/SHA256SUMS" -o "$tmp/SHA256SUMS" 2>/dev/null; then
+        (cd "$tmp" && grep ' src.tar.gz$' SHA256SUMS | sha256sum -c --quiet -) || die "checksum ไม่ตรง — ยกเลิกการอัปเดต"
+        log "    checksum ถูกต้อง"
+    fi
+
+    mkdir "$tmp/src"; tar -xzf "$tmp/src.tar.gz" -C "$tmp/src" --strip-components=1
+    src="$tmp/src"
+    [ -f "$src/config/aprilos.conf" ] || die "ไฟล์ใน release ไม่ถูกต้อง (ไม่พบ config/aprilos.conf)"
+
+    export DEBIAN_FRONTEND=noninteractive
+
+    log "==> [1/5] อัปเดตแพ็กเกจของ Ubuntu"
+    apt-get update >>"$LOG" 2>&1
+    apt-get -y -o Dpkg::Options::=--force-confold full-upgrade >>"$LOG" 2>&1
+
+    log "==> [2/5] ติดตั้งแพ็กเกจใหม่ตาม packages.list"
+    local missing
+    missing=$(grep -vE '^\s*(#|$)' "$src/config/packages.list" | while read -r p; do
+        dpkg-query -W -f='${Status}' "$p" 2>/dev/null | grep -q "install ok installed" || echo "$p"; done)
+    [ -n "$missing" ] && { log "    ติดตั้ง: $(echo $missing)"; apt-get install -y $missing >>"$LOG" 2>&1; }
+    if [ -f "$src/config/packages-remove.list" ]; then
+        local rm_pkgs
+        rm_pkgs=$(grep -vE '^\s*(#|$)' "$src/config/packages-remove.list" | while read -r p; do
+            dpkg-query -W -f='${Status}' "$p" 2>/dev/null | grep -q "install ok installed" && echo "$p"; done || true)
+        [ -n "$rm_pkgs" ] && { log "    ลบ: $(echo $rm_pkgs)"; apt-get purge -y $rm_pkgs >>"$LOG" 2>&1; }
+    fi
+
+    log "==> [3/5] คัดลอกไฟล์ระบบของ AprilOS (overlay)"
+    cp -a --no-preserve=ownership "$src/overlay/." /
+    chmod 755 /usr/local/sbin/aprilos-update /usr/local/bin/aprilos-update-notifier /usr/local/lib/aprilos/*.sh 2>/dev/null || true
+
+    log "==> [4/5] รัน migration scripts"
+    if [ -d "$src/updates/migrations" ]; then
+        for m in $(ls "$src/updates/migrations"/*.sh 2>/dev/null | sort -V); do
+            local mv; mv=$(basename "$m" .sh)
+            if ver_gt "$mv" "$cur" && ! ver_gt "$mv" "$new"; then
+                log "    migration $mv"
+                bash "$m" >>"$LOG" 2>&1 || die "migration $mv ล้มเหลว (ดู $LOG)"
+            fi
+        done
+    fi
+
+    log "==> [5/5] อัปเดตเวอร์ชันระบบ"
+    bash /usr/local/lib/aprilos/write-branding.sh "$src/config/aprilos.conf"
+    systemctl daemon-reload 2>/dev/null || true
+    apt-get -y autoremove --purge >>"$LOG" 2>&1 || true
+
+    mkdir -p "$STATE_DIR"; echo "$new ($(date '+%F %T'))" > "$STATE_DIR/last-update"
+    rm -f /run/aprilos-update/available
+    log "✅ อัปเดตเป็น AprilOS $new เรียบร้อย"
+    [ -f /var/run/reboot-required ] && log "⚠️  กรุณารีสตาร์ทเครื่องเพื่อให้อัปเดตมีผลครบ"
+    return 0
+}
+
+cmd_auto() {
+    is_live && exit 0
+    if cmd_check; then
+        [ "$AUTO_APPLY" = "yes" ] && cmd_apply
+    fi
+    return 0
+}
+
+case "${1:-}" in
+    check)  cmd_check ;;
+    apply)  cmd_apply ;;
+    status) cmd_status ;;
+    auto)   cmd_auto ;;
+    "")     cmd_check && cmd_apply ;;
+    *) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

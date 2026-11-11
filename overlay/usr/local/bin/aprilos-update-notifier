@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# รันตอนผู้ใช้ล็อกอินเข้าเดสก์ท็อป: ตรวจอัปเดตทุก 6 ชั่วโมง แล้วแสดงการแจ้งเตือน
+grep -qw 'boot=casper' /proc/cmdline 2>/dev/null && exit 0   # ไม่ทำงานใน Live session
+sleep 60
+notified=""
+while true; do
+    if out=$(aprilos-update check 2>/dev/null); then
+        new=$(echo "$out" | sed -nE 's/.*→ (.+)$/\1/p')
+        if [ -n "$new" ] && [ "$new" != "$notified" ]; then
+            notify-send -a "AprilOS Updater" -i system-software-update \
+                "มี AprilOS $new ให้อัปเดต" \
+                "เปิดเมนู → AprilOS Updater หรือรัน: sudo aprilos-update apply"
+            notified="$new"
+        fi
+    fi
+    sleep 21600
+done
