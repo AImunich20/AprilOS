@@ -56,7 +56,8 @@ live)
     rm -f "$MON"
     $QEMU "${BASE[@]}" "${CDROM[@]}" & pid=$!
     echo "บูต Live ISO ($A, accel=$ACCEL) ..."; sleep ${WAIT:-100}
-    shot "live-${A}"; stop; wait $pid 2>/dev/null || true ;;
+    shot "live-${A}"
+    if [ -n "${LOGIN:-}" ]; then mon "sendkey ret"; sleep ${LOGIN}; shot "live-desktop-${A}"; fi; stop; wait $pid 2>/dev/null || true ;;
 install)
     rm -f "$DISK" "$MON"; qemu-img create -q -f qcow2 "$DISK" 25G
     tmp=$(mktemp -d); bsdtar -xf "$ISO" -C "$tmp" casper/vmlinuz casper/initrd

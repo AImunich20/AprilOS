@@ -119,7 +119,7 @@ fallocate -l 2G "$TARGET/swapfile" && chmod 600 "$TARGET/swapfile" && mkswap -q 
 
 echo "$HOSTNAME_NEW" > "$TARGET/etc/hostname"
 printf '127.0.0.1\tlocalhost\n127.0.1.1\t%s\n::1\tlocalhost ip6-localhost ip6-loopback\n' "$HOSTNAME_NEW" > "$TARGET/etc/hosts"
-rm -f "$TARGET/etc/casper.conf" "$TARGET/etc/skel/Desktop/aprilos-install.desktop" \
+rm -f "$TARGET/etc/casper.conf" "$TARGET/etc/lightdm/lightdm.conf.d/70-aprilos-live.conf" "$TARGET/etc/skel/Desktop/aprilos-install.desktop" \
       "$TARGET/usr/share/applications/aprilos-install.desktop"
 
 for m in dev dev/pts proc sys run; do mount --bind "/$m" "$TARGET/$m"; done
