@@ -4,6 +4,8 @@
 # usage: write-branding.sh /path/to/aprilos.conf
 set -euo pipefail
 source "$1"
+# ตอนอัปเดต ใช้เลขเวอร์ชันจาก tag ของ release เป็นหลัก (กันกรณีลืมแก้ OS_VERSION)
+OS_VERSION="${APRILOS_VERSION_OVERRIDE:-$OS_VERSION}"
 
 # divert ครั้งเดียว เพื่อไม่ให้ base-files ของ Ubuntu เขียนทับตอน apt upgrade
 for f in /usr/lib/os-release /etc/lsb-release; do

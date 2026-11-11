@@ -1,0 +1,13 @@
+[Unit]
+Description=AprilOS unattended install (aprilos.autoinstall=<disk> on kernel cmdline)
+ConditionKernelCommandLine=aprilos.autoinstall
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/aprilos-install --auto
+StandardOutput=journal+console
+StandardError=journal+console
+
+[Install]
+WantedBy=multi-user.target

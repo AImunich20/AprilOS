@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Install AprilOS
+Name[th]=ติดตั้ง AprilOS
+Comment=Install AprilOS to this computer
+Icon=system-software-install
+Exec=xfce4-terminal --hold -T "Install AprilOS" -x sudo /usr/local/sbin/aprilos-install
+Terminal=false
+Categories=System;

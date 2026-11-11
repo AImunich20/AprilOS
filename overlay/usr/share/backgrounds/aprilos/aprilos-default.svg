@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b1a4a"/>
+      <stop offset="0.55" stop-color="#7a3b78"/>
+      <stop offset="1" stop-color="#f29bb5"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.78" cy="0.3" r="0.55">
+      <stop offset="0" stop-color="#ffd6e3" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffd6e3" stop-opacity="0"/>
+    </radialGradient>
+    <g id="petal"><path d="M0,-120 C70,-120 110,-40 0,60 C-110,-40 -70,-120 0,-120 Z"/></g>
+    <g id="blossom">
+      <use href="#petal"/>
+      <use href="#petal" transform="rotate(72)"/>
+      <use href="#petal" transform="rotate(144)"/>
+      <use href="#petal" transform="rotate(216)"/>
+      <use href="#petal" transform="rotate(288)"/>
+    </g>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#bg)"/>
+  <rect width="3840" height="2160" fill="url(#glow)"/>
+  <g fill="#ffe3ec" fill-opacity="0.10">
+    <use href="#blossom" transform="translate(2950,640) scale(3.2) rotate(12)"/>
+    <use href="#blossom" transform="translate(3420,1480) scale(1.6) rotate(40)"/>
+    <use href="#blossom" transform="translate(560,1700) scale(2.2) rotate(-20)"/>
+  </g>
+  <g fill="#ffe3ec" fill-opacity="0.22">
+    <use href="#blossom" transform="translate(2420,1240) scale(0.5) rotate(25)"/>
+    <use href="#blossom" transform="translate(1220,520) scale(0.35) rotate(-8)"/>
+    <use href="#blossom" transform="translate(3180,1900) scale(0.4) rotate(55)"/>
+    <use href="#blossom" transform="translate(860,1080) scale(0.25) rotate(5)"/>
+  </g>
+  <text x="3640" y="2010" text-anchor="end" font-family="Noto Sans, DejaVu Sans, sans-serif"
+        font-size="96" font-weight="300" letter-spacing="12" fill="#ffffff" fill-opacity="0.75">AprilOS</text>
+</svg>

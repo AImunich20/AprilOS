@@ -1,92 +1,149 @@
 <div align="center">
 
-# 🌸 AprilOS
+# AprilOS
 
-**ระบบปฏิบัติการที่เบา สวย และพูดภาษาไทยได้ตั้งแต่บูตแรก**
+**ระบบปฏิบัติการที่เบา สวย และใช้ภาษาไทยได้ตั้งแต่บูตแรก**
 
-สร้างบนฐาน Ubuntu LTS · เดสก์ท็อป XFCE · อัปเดตตัวเองผ่าน GitHub
+สร้างบนฐาน Ubuntu LTS &nbsp;·&nbsp; เดสก์ท็อป XFCE &nbsp;·&nbsp; อัปเดตตัวเองผ่าน GitHub
 
 ![Base](https://img.shields.io/badge/base-Ubuntu%2024.04%20LTS-E95420?logo=ubuntu&logoColor=white)
 ![Desktop](https://img.shields.io/badge/desktop-XFCE-2284F2?logo=xfce&logoColor=white)
-![Arch](https://img.shields.io/badge/arch-amd64%20%7C%20arm64-6f42c1)
-![Boot](https://img.shields.io/badge/boot-BIOS%20%2B%20UEFI-success)
-![Release](https://img.shields.io/github/v/release/AImunich20/AprilOS?include_prereleases&color=ff69b4&label=release)
+![Arch](https://img.shields.io/badge/arch-x86__64%20%7C%20ARM64%20%7C%20Apple%20Silicon-7a3b78)
+![Boot](https://img.shields.io/badge/boot-UEFI%20%2B%20BIOS-success)
+![Release](https://img.shields.io/github/v/release/AImunich20/AprilOS?include_prereleases&color=f29bb5&label=release)
 
-[ดาวน์โหลด](https://github.com/AImunich20/AprilOS/releases/latest) · [Build เอง](#️-build-เอง) · [ระบบอัปเดต](#-อัปเดตตัวเองผ่าน-github) · [Roadmap](#️-roadmap)
+[ดาวน์โหลด](https://github.com/AImunich20/AprilOS/releases/latest) &nbsp;·&nbsp;
+[ติดตั้ง](#ติดตั้ง) &nbsp;·&nbsp;
+[Build เอง](#build-เอง) &nbsp;·&nbsp;
+[ระบบอัปเดต](#อัปเดตตัวเองผ่าน-github) &nbsp;·&nbsp;
+[Roadmap](#roadmap)
+
+<br>
+
+<img src="docs/images/desktop.png" alt="หน้าจอเดสก์ท็อปของ AprilOS" width="900">
 
 </div>
 
 ---
 
-## ✨ ทำไมต้อง AprilOS
+## จุดเด่น
 
 | | |
 |---|---|
-| 🪶 **เบาและเร็ว** | ใช้ XFCE เปิดเครื่องไว ใช้ RAM น้อย รันได้ดีแม้บนเครื่องเก่า |
-| 🇹🇭 **ภาษาไทยพร้อมใช้** | ฟอนต์ไทย, ระบบพิมพ์ไทย (ibus-libthai), เขตเวลา Asia/Bangkok ตั้งไว้ให้แล้ว |
-| 🔄 **อัปเดตตัวเอง** | ปล่อย Release บน GitHub ครั้งเดียว ทุกเครื่องอัปเดตตาม พร้อมตรวจ checksum |
-| 🧱 **ฐานแข็งแรง** | Ubuntu LTS + แพตช์ความปลอดภัยจาก Ubuntu โดยตรง ใช้แพ็กเกจจาก `apt` ได้ทั้งหมด |
-| 💿 **Live ISO** | ลองใช้ได้ทันทีจาก USB โดยไม่ต้องติดตั้ง บูตได้ทั้ง BIOS และ UEFI |
-| 🛠️ **ปรับแต่งง่าย** | แก้ไฟล์ข้อความไม่กี่ไฟล์ก็ได้ OS เวอร์ชันของคุณเอง |
+| **เบาและเร็ว** | ใช้ XFCE เปิดเครื่องไว ใช้ RAM น้อย ทำงานลื่นแม้บนเครื่องรุ่นเก่า |
+| **ภาษาไทยพร้อมใช้** | มีฟอนต์ไทย ระบบพิมพ์ไทย (ibus-libthai) และตั้งเขตเวลา Asia/Bangkok ไว้แล้ว |
+| **รองรับหลายสถาปัตยกรรม** | มี ISO สำหรับ x86_64 และ ARM64 ใช้ได้ทั้ง PC, เครื่อง ARM และ VM บน Mac Apple Silicon |
+| **ติดตั้งง่าย** | ลองใช้จาก USB ได้ทันที แล้วกด "Install AprilOS" เพื่อติดตั้งลงเครื่อง |
+| **อัปเดตตัวเอง** | กด Publish release บน GitHub ครั้งเดียว ทุกเครื่องได้อัปเดต พร้อมตรวจ checksum |
+| **ฐานแข็งแรง** | Ubuntu LTS รับแพตช์ความปลอดภัยจาก Ubuntu โดยตรง และติดตั้งโปรแกรมจาก `apt` ได้ทั้งหมด |
 
-## 🚀 เริ่มต้นใช้งาน
+## ดาวน์โหลด
 
-1. ดาวน์โหลดไฟล์ `.iso` จากหน้า [Releases](https://github.com/AImunich20/AprilOS/releases/latest)
-2. เขียนลง USB ด้วย [balenaEtcher](https://etcher.balena.io/) หรือเปิดใน VM (UTM, VirtualBox, VMware)
-3. บูตแล้วเลือก **Try AprilOS** ระบบจะล็อกอินให้อัตโนมัติเป็นผู้ใช้ `april`
+เลือกไฟล์ให้ตรงกับเครื่องจากหน้า [Releases](https://github.com/AImunich20/AprilOS/releases/latest)
 
-> หน้าจอเพี้ยนหรือจอดำ? เลือก **Try AprilOS (safe graphics)** ที่เมนูบูต
+| ไฟล์ | ใช้กับ |
+|---|---|
+| `AprilOS-<เวอร์ชัน>-amd64.iso` | PC และโน้ตบุ๊กทั่วไป (Intel / AMD), Mac รุ่น Intel |
+| `AprilOS-<เวอร์ชัน>-arm64.iso` | เครื่อง ARM64 ที่บูตแบบ UEFI และ VM บน Mac Apple Silicon |
 
-## 🏗️ Build เอง
+ตรวจความถูกต้องของไฟล์ได้ด้วย `ISO-SHA256SUMS` ที่แนบมาใน release เดียวกัน
+
+## ติดตั้ง
+
+**บน PC หรือเครื่อง ARM**
+
+1. เขียน ISO ลง USB ด้วย [balenaEtcher](https://etcher.balena.io/) หรือ Rufus
+2. บูตจาก USB แล้วเลือก **Try or Install AprilOS** ระบบจะเข้าเดสก์ท็อปทันที
+3. ดับเบิลคลิก **Install AprilOS** บนเดสก์ท็อป เลือกดิสก์ ตั้งชื่อผู้ใช้และรหัสผ่าน
+4. ติดตั้งเสร็จแล้วถอด USB และรีสตาร์ท
+
+**บน Mac Apple Silicon (M1 / M2 / M3 / M4)**
+
+ใช้ไฟล์ `arm64.iso` กับโปรแกรม VM อย่าง [UTM](https://mac.getutm.app/) (ฟรี), Parallels หรือ VMware Fusion
+
+1. สร้าง VM ใหม่แบบ **Virtualize → Linux** แล้วเลือกไฟล์ ISO
+2. แนะนำ RAM 4 GB และดิสก์ 25 GB ขึ้นไป
+3. บูตแล้วติดตั้งตามขั้นตอนเดียวกับด้านบน จากนั้นถอด ISO ออกจาก VM
+
+> Mac Apple Silicon บูต Linux ทั่วไปลงเครื่องตรงๆ ไม่ได้ จึงต้องใช้ผ่าน VM ส่วน Mac Intel ใช้ `amd64.iso` บูตจาก USB ได้
+
+**ติดตั้งผ่าน Terminal** (ทั้งแบบถามตอบหรือแบบอัตโนมัติ)
+
+```bash
+sudo aprilos-install                                         # แบบถามตอบ
+sudo aprilos-install --disk /dev/sda --user april --password '...' --yes
+```
+
+> หน้าจอเพี้ยนหรือจอดำ ให้เลือก **(safe graphics)** ที่เมนูบูต
+> การติดตั้งจะลบข้อมูลทั้งหมดในดิสก์ที่เลือก
+
+## Build เอง
 
 ต้องมีแค่ **Docker** (Docker Desktop, OrbStack หรือ colima) ใช้ได้ทั้ง macOS และ Linux
 
 ```bash
 git clone https://github.com/AImunich20/AprilOS.git
 cd AprilOS
-./build.sh
+./build.sh            # build ทั้ง amd64 และ arm64 พร้อมกัน
+./build.sh arm64      # หรือเลือกเฉพาะสถาปัตยกรรมเดียว
 ```
 
-ได้ไฟล์ `out/AprilOS-<เวอร์ชัน>-amd64.iso`
+ไฟล์ ISO จะอยู่ใน `out/` พร้อม `ISO-SHA256SUMS` ส่วน log ของแต่ละสถาปัตยกรรมอยู่ใน `out/logs/`
 
 ```
-debootstrap  ──►  ติดตั้งแพ็กเกจ + branding  ──►  squashfs  ──►  ISO (BIOS + UEFI)
-  (Ubuntu)           (chroot)                    (casper)       (grub-mkrescue)
+debootstrap  ->  ติดตั้งแพ็กเกจ + branding  ->  squashfs (zstd)  ->  ISO (UEFI + BIOS)
 ```
 
-> 🍎 **Apple Silicon:** การ build `amd64` ต้องจำลอง CPU จึงใช้เวลาราว 30–90 นาที
-> ถ้าต้องการทดสอบใน UTM บน Mac ให้เร็วขึ้น ให้ตั้งใน `config/aprilos.conf` เป็น
-> `ARCH="arm64"` และ `UBUNTU_MIRROR="http://ports.ubuntu.com/ubuntu-ports"`
+**เทคนิคที่ทำให้ build เร็ว**
 
-## 🎨 ปรับแต่งให้เป็นของคุณ
+- build ทุกสถาปัตยกรรมพร้อมกัน และบีบอัด squashfs โดยใช้ทุก core ของ CPU
+- เก็บแพ็กเกจที่ดาวน์โหลดแล้วไว้ใน Docker volume รอบถัดไปจึงไม่ต้องโหลดใหม่
+- ใช้ `eatmydata` ข้ามการ fsync ระหว่างติดตั้งแพ็กเกจ และใช้ zstd แทน xz
+- ต้องการไฟล์เล็กที่สุดให้ใช้ `SQUASH_COMP=xz ./build.sh` (ช้ากว่าแต่ไฟล์เล็กลง)
+
+> บน Mac Apple Silicon การ build `arm64` เร็วมากเพราะรันตรงบน CPU ส่วน `amd64` ต้องจำลอง CPU จึงใช้เวลานานกว่า
+
+## ปรับแต่ง
 
 | อยากเปลี่ยน | แก้ที่ |
 |---|---|
 | ชื่อ, เวอร์ชัน, โค้ดเนม, เขตเวลา, ภาษา | `config/aprilos.conf` |
 | เพิ่มโปรแกรม | `config/packages.list` |
 | ลบโปรแกรมออกจากเครื่องผู้ใช้ตอนอัปเดต | `config/packages-remove.list` |
-| Wallpaper, ธีม, ไฟล์ตั้งค่า | วางไว้ใน `overlay/` ตาม path จริง เช่น `overlay/usr/share/backgrounds/` |
+| Wallpaper | `overlay/usr/share/backgrounds/aprilos/aprilos-default.svg` |
+| ไฟล์ตั้งค่าอื่นๆ, ธีม | วางใน `overlay/` ตาม path จริงของระบบ |
 | เปลี่ยนเป็น GNOME | แทนส่วน XFCE ใน `packages.list` ด้วย `ubuntu-desktop-minimal` |
 | คำสั่งพิเศษตอน build | `scripts/customize-chroot.sh` |
 
-## 🔄 อัปเดตตัวเองผ่าน GitHub
+## อัปเดตตัวเองผ่าน GitHub
 
 ทุกเครื่องที่ติดตั้ง AprilOS จะคอยดู **GitHub Releases** ของ repo นี้ เมื่อมีเวอร์ชันใหม่จะแจ้งเตือนหรือติดตั้งให้เอง
 
 ```
- ผู้พัฒนา                         GitHub                         เครื่องผู้ใช้
-──────────                   ─────────────                  ─────────────────
-./release.sh 0.2  ──push──►  Release v0.2      ◄──check──   systemd timer (วันละครั้ง)
-                             + SHA256SUMS                   🔔 แจ้งเตือนบนเดสก์ท็อป
-                                               ──download─► sudo aprilos-update
+ ผู้พัฒนา                         GitHub                          เครื่องผู้ใช้
+----------                   -------------                   -----------------
+push ผ่าน GitHub Desktop --> Release v0.2                     systemd timer (วันละครั้ง)
+Publish release              + SHA256SUMS (อัตโนมัติ) <-check-- แจ้งเตือนบนเดสก์ท็อป
+                                                     -download-> sudo aprilos-update
 ```
 
 ### ปล่อยเวอร์ชันใหม่
 
-```bash
-./release.sh 0.2 "เพิ่มธีมใหม่ + แก้บั๊ก"      # stable
-./release.sh 0.3 "ทดลองฟีเจอร์ใหม่" --beta     # prerelease
-```
+1. แก้ไฟล์ตามต้องการ และเปลี่ยน `OS_VERSION` ใน `config/aprilos.conf` เช่น `"0.2"`
+2. Commit และ Push ผ่าน GitHub Desktop
+3. Build ISO แล้วสร้าง Draft release พร้อมแนบ ISO ด้วยคำสั่ง
+
+   ```bash
+   ./build.sh
+   ./scripts/prepare-release.sh "สรุปสิ่งที่เปลี่ยน"
+   ```
+
+4. เปิดหน้า [Releases](https://github.com/AImunich20/AprilOS/releases) ตรวจดู แล้วกด **Publish release**
+
+หลังกด Publish, GitHub Actions จะแนบ `SHA256SUMS` ให้อัตโนมัติ และเครื่องผู้ใช้จะเริ่มได้รับอัปเดต
+(ข้ามขั้นตอนที่ 3 ได้ ถ้าจะสร้าง release บนหน้าเว็บโดยไม่แนบ ISO ก็ได้เช่นกัน โดยตั้ง tag เป็น `v0.2`)
+
+ติ๊ก **Set as a pre-release** เพื่อปล่อยเป็นเวอร์ชัน beta เช่น tag `v0.3-beta1` จะมีเฉพาะเครื่องที่เปิดรับ beta เท่านั้นที่ได้รับ
 
 ### บนเครื่องผู้ใช้
 
@@ -99,11 +156,11 @@ debootstrap  ──►  ติดตั้งแพ็กเกจ + branding  �
 <details>
 <summary><b>ขั้นตอนที่เกิดขึ้นตอนอัปเดต</b></summary>
 
-1. ดาวน์โหลด source ของแท็กล่าสุด แล้วตรวจกับ `SHA256SUMS` ที่แนบใน Release
+1. ดาวน์โหลด source ของ tag ล่าสุด แล้วตรวจกับ `SHA256SUMS` ที่แนบใน release
 2. `apt full-upgrade` เพื่อรับแพตช์ความปลอดภัยของ Ubuntu
 3. ติดตั้งแพ็กเกจที่เพิ่มใหม่ และลบแพ็กเกจตาม `packages-remove.list`
-4. คัดลอกไฟล์ใน `overlay/` ลงระบบ (ตัว updater ก็อัปเดตตัวเองตรงนี้)
-5. รันสคริปต์ใน `updates/migrations/<เวอร์ชัน>.sh` ที่ยังไม่เคยรัน
+4. คัดลอกไฟล์ใน `overlay/` ลงระบบ (ตัว updater อัปเดตตัวเองในขั้นนี้ด้วย)
+5. รันสคริปต์ `updates/migrations/<เวอร์ชัน>.sh` ที่ยังไม่เคยรัน
 6. อัปเดตเลขเวอร์ชันใน `/etc/os-release`
 
 log ทั้งหมดอยู่ที่ `/var/log/aprilos-update.log`
@@ -115,43 +172,47 @@ log ทั้งหมดอยู่ที่ `/var/log/aprilos-update.log`
 
 | ค่า | ความหมาย |
 |---|---|
-| `AUTO_APPLY="yes"` | ติดตั้งอัปเดตอัตโนมัติ (ค่าเริ่มต้น `no` = แจ้งเตือนอย่างเดียว) |
+| `AUTO_APPLY="yes"` | ติดตั้งอัปเดตอัตโนมัติ (ค่าเริ่มต้น `no` คือแจ้งเตือนอย่างเดียว) |
 | `INCLUDE_PRERELEASE="yes"` | รับเวอร์ชัน beta ด้วย |
 
 </details>
 
-> ⚠️ **ความปลอดภัย:** ใครที่สร้าง Release ใน repo นี้ได้ ก็สั่งรันโค้ดด้วยสิทธิ์ root บนเครื่องผู้ใช้ได้ ควรเปิด 2FA และจำกัดคนที่เข้าถึง repo
+> **ความปลอดภัย:** ใครที่สร้าง release ใน repo นี้ได้ ก็สั่งรันโค้ดด้วยสิทธิ์ root บนเครื่องผู้ใช้ได้ ควรเปิด 2FA และจำกัดคนที่เข้าถึง repo
 
-## 📁 โครงสร้างโปรเจกต์
+## โครงสร้างโปรเจกต์
 
 ```
 AprilOS/
-├── build.sh                 🏗️  build ISO ผ่าน Docker
-├── release.sh               🚀  ปล่อยเวอร์ชันใหม่ขึ้น GitHub Releases
-├── builder/Dockerfile       🐳  สภาพแวดล้อมสำหรับ build
-├── config/                  ⚙️  ค่าตั้งและรายการแพ็กเกจ
-├── scripts/                 📜  ขั้นตอน build (debootstrap → chroot → ISO)
-├── overlay/                 🎨  ไฟล์ที่คัดลอกลงระบบ รวมถึงตัว updater
-└── updates/migrations/      🔧  สคริปต์ที่รันครั้งเดียวตอนอัปเดตไปเวอร์ชันนั้น
+├── build.sh                    build ISO ผ่าน Docker (หลายสถาปัตยกรรมพร้อมกัน)
+├── builder/Dockerfile          สภาพแวดล้อมสำหรับ build
+├── config/                     ค่าตั้งและรายการแพ็กเกจ
+├── scripts/
+│   ├── build-iso.sh            debootstrap -> chroot -> squashfs -> ISO
+│   ├── customize-chroot.sh     ติดตั้งแพ็กเกจและ branding
+│   └── prepare-release.sh      สร้าง Draft release พร้อมแนบ ISO
+├── overlay/                    ไฟล์ที่คัดลอกลงระบบ (updater, installer, wallpaper)
+├── updates/migrations/         สคริปต์ที่รันครั้งเดียวตอนอัปเดตไปเวอร์ชันนั้น
+├── docs/images/                ภาพหน้าจอ
+└── .github/workflows/          แนบ checksum ให้ release อัตโนมัติ
 ```
 
-## 🗺️ Roadmap
+## Roadmap
 
-- [x] Live ISO บูตได้ทั้ง BIOS + UEFI
-- [x] Branding AprilOS + ภาษาไทยพร้อมใช้
+- [x] Live ISO บูตได้ทั้ง UEFI และ BIOS
+- [x] Branding AprilOS, wallpaper และภาษาไทยพร้อมใช้
+- [x] ISO สำหรับ x86_64 และ ARM64 (รวม VM บน Apple Silicon)
+- [x] ตัวติดตั้งลงดิสก์ (`aprilos-install`)
 - [x] ระบบอัปเดตตัวเองผ่าน GitHub Releases
-- [ ] Wallpaper, ธีม, ไอคอน และหน้าจอตอนบูต (Plymouth) ของ AprilOS
-- [ ] ตัวติดตั้งลงฮาร์ดดิสก์ (Calamares)
+- [ ] ตัวติดตั้งแบบกราฟิก (Calamares)
+- [ ] ธีม ไอคอน และหน้าจอตอนบูต (Plymouth) ของ AprilOS
 - [ ] เว็บเบราว์เซอร์ติดตั้งมาให้
 - [ ] build ISO อัตโนมัติด้วย GitHub Actions
 
-## 🤝 ร่วมพัฒนา
+## ร่วมพัฒนา
 
-ยินดีรับทุก Issue และ Pull Request ไม่ว่าจะเป็นรายงานบั๊ก ไอเดียฟีเจอร์ หรือธีมสวยๆ 🌸
+ยินดีรับทุก Issue และ Pull Request ไม่ว่าจะเป็นรายงานบั๊ก ไอเดียฟีเจอร์ หรือธีมใหม่
 
 <div align="center">
-
-สร้างด้วย 💖 บนฐาน [Ubuntu](https://ubuntu.com)
-AprilOS ไม่ได้เกี่ยวข้องหรือได้รับการรับรองจาก Canonical Ltd.
-
+<br>
+<sub>สร้างบนฐาน <a href="https://ubuntu.com">Ubuntu</a> · AprilOS ไม่ได้เกี่ยวข้องหรือได้รับการรับรองจาก Canonical Ltd.</sub>
 </div>

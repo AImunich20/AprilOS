@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+# aprilos-install — ติดตั้ง AprilOS ลงดิสก์ (ใช้จาก Live session)
+#
+#   sudo aprilos-install                         โหมดถามตอบ (เลือกดิสก์, ตั้งชื่อผู้ใช้/รหัสผ่าน)
+#   sudo aprilos-install --disk /dev/sda --user april --password secret [--hostname aprilos] --yes
+#   aprilos.autoinstall=/dev/vda  (kernel cmdline) → ติดตั้งอัตโนมัติ แล้วปิดเครื่อง (ใช้ทดสอบ / ติดตั้งหลายเครื่อง)
+#
+# รองรับ: x86_64 (UEFI + BIOS), ARM64 (UEFI) — รวมถึง VM บน Mac Apple Silicon (UTM, Parallels, VMware Fusion)
+# ⚠️  ดิสก์ที่เลือกจะถูกลบข้อมูลทั้งหมด
+set -euo pipefail
+
+DISK="" USERNAME="" PASSWORD="" FULLNAME="" HOSTNAME_NEW="aprilos" YES=no AUTO=no
+TARGET=/target
+ARCH=$(dpkg --print-architecture)
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --disk) DISK=$2; shift ;;
+        --user) USERNAME=$2; shift ;;
+        --password) PASSWORD=$2; shift ;;
+        --fullname) FULLNAME=$2; shift ;;
+        --hostname) HOSTNAME_NEW=$2; shift ;;
+        --yes) YES=yes ;;
+        --auto) AUTO=yes ;;
+        -h|--help) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "ไม่รู้จักตัวเลือก: $1"; exit 2 ;;
+    esac
+    shift
+done
+
+[ "$(id -u)" -eq 0 ] || exec sudo "$0" "$@"
+
+if [ "$AUTO" = yes ]; then
+    DISK=$(sed -nE 's/.*aprilos\.autoinstall=([^ ]+).*/\1/p' /proc/cmdline)
+    USERNAME=april PASSWORD=april FULLNAME="AprilOS User" YES=yes
+fi
+
+say()  { echo -e "\033[1;35m==>\033[0m $*"; }
+die()  { echo -e "\033[1;31mERROR:\033[0m $*" >&2; exit 1; }
+part() { case "$1" in *nvme*|*mmcblk*|*loop*) echo "${1}p$2" ;; *) echo "${1}$2" ;; esac; }
+
+# ---------- หาไฟล์ระบบต้นฉบับ (squashfs ของ Live) ----------
+SRC=""
+for d in /rofs /run/live/rootfs/filesystem.squashfs /run/rootfsbase; do
+    [ -d "$d/usr/bin" ] && { SRC=$d; break; }
+done
+[ -n "$SRC" ] || die "ไม่พบไฟล์ระบบของ Live — ต้องรันจาก AprilOS Live ISO"
+LIVE_DEV=$(findmnt -no SOURCE /cdrom 2>/dev/null | sed -E 's/p?[0-9]+$//' || true)
+
+# ---------- โหมดถามตอบ ----------
+if [ -z "$DISK" ]; then
+    command -v whiptail >/dev/null || die "ไม่พบ whiptail"
+    mapfile -t rows < <(lsblk -dnpo NAME,SIZE,MODEL,TYPE | awk '$NF=="disk"' | grep -v "^${LIVE_DEV:-__none__} ")
+    [ ${#rows[@]} -gt 0 ] || die "ไม่พบดิสก์ที่ติดตั้งได้"
+    menu=(); for r in "${rows[@]}"; do n=${r%% *}; d=${r#* }; menu+=("$n" "${d% disk}"); done
+    DISK=$(whiptail --title "ติดตั้ง AprilOS" --menu "เลือกดิสก์ที่จะติดตั้ง (ข้อมูลในดิสก์จะถูกลบทั้งหมด)" 18 72 8 "${menu[@]}" 3>&1 1>&2 2>&3) || exit 1
+    FULLNAME=$(whiptail --inputbox "ชื่อของคุณ" 8 60 "" 3>&1 1>&2 2>&3) || exit 1
+    USERNAME=$(whiptail --inputbox "ชื่อผู้ใช้ (ภาษาอังกฤษตัวเล็ก)" 8 60 "april" 3>&1 1>&2 2>&3) || exit 1
+    while :; do
+        PASSWORD=$(whiptail --passwordbox "รหัสผ่าน" 8 60 3>&1 1>&2 2>&3) || exit 1
+        P2=$(whiptail --passwordbox "ยืนยันรหัสผ่าน" 8 60 3>&1 1>&2 2>&3) || exit 1
+        [ -n "$PASSWORD" ] && [ "$PASSWORD" = "$P2" ] && break
+        whiptail --msgbox "รหัสผ่านไม่ตรงกัน หรือว่างเปล่า ลองใหม่อีกครั้ง" 8 60
+    done
+    HOSTNAME_NEW=$(whiptail --inputbox "ชื่อเครื่อง" 8 60 "aprilos" 3>&1 1>&2 2>&3) || exit 1
+    whiptail --yesno "ยืนยันติดตั้ง AprilOS ลง $DISK ?\n\nข้อมูลทั้งหมดใน $DISK จะถูกลบ" 10 60 || exit 1
+    YES=yes
+fi
+
+[ -b "$DISK" ] || die "ไม่พบดิสก์ $DISK"
+[[ "$USERNAME" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "ชื่อผู้ใช้ไม่ถูกต้อง: $USERNAME"
+[ -n "$PASSWORD" ] || die "ต้องระบุรหัสผ่าน"
+[ "$DISK" != "$LIVE_DEV" ] || die "$DISK คือ USB/ISO ที่ใช้บูตอยู่"
+if [ "$YES" != yes ]; then
+    read -rp "ข้อมูลทั้งหมดใน $DISK จะถูกลบ พิมพ์ YES เพื่อยืนยัน: " ans; [ "$ans" = YES ] || exit 1
+fi
+
+cleanup() {
+    for m in sys/firmware/efi/efivars run sys proc dev/pts dev boot/efi ""; do umount -lf "$TARGET/$m" 2>/dev/null || true; done
+}
+trap cleanup EXIT
+
+# ---------- 1) แบ่งพาร์ทิชัน ----------
+say "[1/6] แบ่งพาร์ทิชัน $DISK (GPT)"
+umount -lf "$DISK"* 2>/dev/null || true
+wipefs -af "$DISK" >/dev/null
+parted -s "$DISK" mklabel gpt
+if [ "$ARCH" = amd64 ]; then
+    parted -s "$DISK" mkpart bios 1MiB 2MiB set 1 bios_grub on
+    parted -s "$DISK" mkpart EFI fat32 2MiB 514MiB set 2 esp on
+    parted -s "$DISK" mkpart AprilOS ext4 514MiB 100%
+    ESP=$(part "$DISK" 2); ROOT=$(part "$DISK" 3)
+else
+    parted -s "$DISK" mkpart EFI fat32 1MiB 513MiB set 1 esp on
+    parted -s "$DISK" mkpart AprilOS ext4 513MiB 100%
+    ESP=$(part "$DISK" 1); ROOT=$(part "$DISK" 2)
+fi
+partprobe "$DISK" 2>/dev/null || true; udevadm settle; sleep 1
+
+say "[2/6] ฟอร์แมต"
+mkfs.vfat -F32 -n EFI "$ESP" >/dev/null
+mkfs.ext4 -qF -L AprilOS "$ROOT"
+mkdir -p "$TARGET"; mount "$ROOT" "$TARGET"
+mkdir -p "$TARGET/boot/efi"; mount "$ESP" "$TARGET/boot/efi"
+
+# ---------- 2) คัดลอกระบบ ----------
+say "[3/6] คัดลอกไฟล์ระบบ (อาจใช้เวลาหลายนาที)"
+rsync -aHAX --info=progress2 --exclude=/boot/efi "$SRC/" "$TARGET/"
+
+# ---------- 3) ตั้งค่าระบบ ----------
+say "[4/6] ตั้งค่าระบบ"
+cat > "$TARGET/etc/fstab" <<FSTAB
+# <file system>                            <mount>    <type>  <options>          <dump> <pass>
+UUID=$(blkid -s UUID -o value "$ROOT")  /          ext4    errors=remount-ro  0      1
+UUID=$(blkid -s UUID -o value "$ESP")                             /boot/efi  vfat    umask=0077         0      1
+/swapfile                                  none       swap    sw                 0      0
+FSTAB
+fallocate -l 2G "$TARGET/swapfile" && chmod 600 "$TARGET/swapfile" && mkswap -q "$TARGET/swapfile"
+
+echo "$HOSTNAME_NEW" > "$TARGET/etc/hostname"
+printf '127.0.0.1\tlocalhost\n127.0.1.1\t%s\n::1\tlocalhost ip6-localhost ip6-loopback\n' "$HOSTNAME_NEW" > "$TARGET/etc/hosts"
+rm -f "$TARGET/etc/casper.conf" "$TARGET/etc/skel/Desktop/aprilos-install.desktop" \
+      "$TARGET/usr/share/applications/aprilos-install.desktop"
+
+for m in dev dev/pts proc sys run; do mount --bind "/$m" "$TARGET/$m"; done
+[ -d /sys/firmware/efi/efivars ] && mount --bind /sys/firmware/efi/efivars "$TARGET/sys/firmware/efi/efivars" || true
+
+chroot "$TARGET" /bin/bash -e <<CHROOT
+export DEBIAN_FRONTEND=noninteractive
+systemctl disable aprilos-autoinstall.service >/dev/null 2>&1 || true
+dpkg --purge casper >/dev/null 2>&1 || true
+useradd -m -s /bin/bash -c "${FULLNAME}" -G sudo,adm,cdrom,audio,video,plugdev,netdev,lpadmin "${USERNAME}" 2>/dev/null \
+  || useradd -m -s /bin/bash -c "${FULLNAME}" -G sudo,adm,cdrom,audio,video,plugdev "${USERNAME}"
+echo "${USERNAME}:${PASSWORD}" | chpasswd
+rm -rf /home/${USERNAME}/Desktop/aprilos-install.desktop
+systemd-machine-id-setup >/dev/null
+CHROOT
+
+# ---------- 4) bootloader ----------
+say "[5/6] ติดตั้ง bootloader"
+chroot "$TARGET" /bin/bash -e <<CHROOT
+update-initramfs -u -k all >/dev/null
+case "$ARCH" in
+  amd64)
+    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=AprilOS --removable --no-nvram
+    [ -d /sys/firmware/efi ] && grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=AprilOS || true
+    grub-install --target=i386-pc "$DISK"
+    ;;
+  arm64)
+    grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=AprilOS --removable --no-nvram
+    [ -d /sys/firmware/efi ] && grub-install --target=arm64-efi --efi-directory=/boot/efi --bootloader-id=AprilOS || true
+    ;;
+esac
+update-grub
+CHROOT
+
+say "[6/6] เสร็จสิ้น"
+sync; cleanup; trap - EXIT
+echo
+echo "✅ ติดตั้ง AprilOS ลง $DISK เรียบร้อย — ถอด USB/ISO แล้วรีสตาร์ทเครื่องได้เลย"
+if [ "$AUTO" = yes ]; then sleep 3; systemctl poweroff; fi

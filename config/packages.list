@@ -14,10 +14,19 @@ nano
 libnotify-bin
 network-manager
 
+# --- ตัวติดตั้งลงดิสก์ (aprilos-install) ---
+parted
+rsync
+whiptail
+dosfstools
+e2fsprogs
+
 # --- เดสก์ท็อป (XFCE: เบาและ build เร็ว) ---
 xorg
 xfce4
 xfce4-terminal
+adwaita-icon-theme
+gnome-themes-extra
 xfce4-whiskermenu-plugin
 thunar
 mousepad

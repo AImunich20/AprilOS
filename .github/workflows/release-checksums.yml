@@ -1,0 +1,35 @@
+# เมื่อกด Publish release บน GitHub → แนบ SHA256SUMS ของ source ให้อัตโนมัติ
+# (aprilos-update บนเครื่องผู้ใช้ใช้ไฟล์นี้ตรวจว่าไฟล์อัปเดตไม่ถูกแก้ไขระหว่างทาง)
+name: Release checksums
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  checksums:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check version in config matches tag
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          conf=$(curl -fsSL "https://raw.githubusercontent.com/$REPO/$TAG/config/aprilos.conf" | sed -nE 's/^OS_VERSION="(.*)"/\1/p')
+          if [ "v$conf" != "$TAG" ]; then
+            echo "::warning::OS_VERSION in config/aprilos.conf is '$conf' but release tag is '$TAG'. Installed systems will report the tag version ($TAG)."
+          fi
+
+      - name: Attach SHA256SUMS of source tarball
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          curl -fsSL "https://github.com/$REPO/archive/refs/tags/$TAG.tar.gz" -o src.tar.gz
+          sha256sum src.tar.gz > SHA256SUMS
+          cat SHA256SUMS
+          gh release upload "$TAG" SHA256SUMS --repo "$REPO" --clobber
