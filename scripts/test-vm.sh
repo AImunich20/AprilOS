@@ -20,6 +20,8 @@ MON="$VM/mon-${A}.sock"
 SHARE=$(dirname "$(dirname "$(command -v qemu-img)")")/share/qemu
 
 [ -f "$ISO" ] || { echo "ไม่พบ $ISO"; exit 1; }
+# live/install เริ่มจาก firmware สะอาด (ไม่มี boot entry ค้างจากการทดสอบครั้งก่อน)
+[ "$MODE" != boot ] && rm -f "$VM/vars-${A}.fd"
 
 if [ "$A" = arm64 ]; then
     QEMU=qemu-system-aarch64
@@ -64,7 +66,7 @@ install)
     echo "ติดตั้งอัตโนมัติลงดิสก์เสมือน ($A) ... (ดู log: $VM/serial-${A}-install.log)"
     $QEMU "${BASE[@]}" "${CDROM[@]}" -drive "file=$DISK,if=virtio,format=qcow2" \
         -kernel "$tmp/casper/vmlinuz" -initrd "$tmp/casper/initrd" \
-        -append "boot=casper aprilos.autoinstall=/dev/vda console=tty0 console=$CONSOLE ---" & pid=$!
+        -append "boot=casper noprompt aprilos.autoinstall=/dev/vda console=tty0 console=$CONSOLE ---" & pid=$!
     for _ in $(seq 1 ${INSTALL_TIMEOUT:-360}); do kill -0 $pid 2>/dev/null || break; sleep 5; done
     kill -0 $pid 2>/dev/null && { shot "install-timeout-${A}"; stop; }
     wait $pid 2>/dev/null || true

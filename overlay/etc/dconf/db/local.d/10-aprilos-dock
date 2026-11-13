@@ -1,0 +1,13 @@
+# AprilOS: Dock (Plank) แบบ macOS — กึ่งกลางล่าง ขยายไอคอนเมื่อชี้เมาส์
+# ผู้ใช้ปรับเองได้ (ค่าของผู้ใช้ทับค่านี้) — หลังแก้ไฟล์นี้ให้รัน: sudo dconf update
+[net/launchpad/plank/docks/dock1]
+theme='WhiteSur-Light'
+position='bottom'
+alignment='center'
+icon-size=48
+zoom-enabled=true
+zoom-percent=150
+hide-mode='none'
+show-dock-item=false
+lock-items=false
+dock-items=['thunar.dockitem', 'xfce4-appfinder.dockitem', 'xfce4-terminal.dockitem', 'org.xfce.mousepad.dockitem', 'xfce-settings-manager.dockitem', 'trash.dockitem']

@@ -24,18 +24,53 @@
 
 </div>
 
+<table>
+<tr>
+<td width="50%"><img src="docs/images/login.png" alt="หน้าจอล็อกอินของ AprilOS"></td>
+<td width="50%"><img src="docs/images/live.png" alt="Live session ของ AprilOS พร้อมไอคอนติดตั้ง"></td>
+</tr>
+<tr>
+<td align="center"><sub>หน้าจอล็อกอินหลังติดตั้งลงเครื่อง</sub></td>
+<td align="center"><sub>Live session จาก USB พร้อมปุ่ม Install AprilOS</sub></td>
+</tr>
+</table>
+
 ---
 
 ## จุดเด่น
 
 | | |
 |---|---|
+| **หน้าตาแบบ macOS** | แถบเมนูด้านบน, Dock ขยายไอคอนเมื่อชี้เมาส์, ปุ่มหน้าต่างอยู่ซ้าย และธีม/ไอคอน/เคอร์เซอร์ WhiteSur |
 | **เบาและเร็ว** | ใช้ XFCE เปิดเครื่องไว ใช้ RAM น้อย ทำงานลื่นแม้บนเครื่องรุ่นเก่า |
 | **ภาษาไทยพร้อมใช้** | มีฟอนต์ไทย ระบบพิมพ์ไทย (ibus-libthai) และตั้งเขตเวลา Asia/Bangkok ไว้แล้ว |
 | **รองรับหลายสถาปัตยกรรม** | มี ISO สำหรับ x86_64 และ ARM64 ใช้ได้ทั้ง PC, เครื่อง ARM และ VM บน Mac Apple Silicon |
 | **ติดตั้งง่าย** | ลองใช้จาก USB ได้ทันที แล้วกด "Install AprilOS" เพื่อติดตั้งลงเครื่อง |
 | **อัปเดตตัวเอง** | กด Publish release บน GitHub ครั้งเดียว ทุกเครื่องได้อัปเดต พร้อมตรวจ checksum |
 | **ฐานแข็งแรง** | Ubuntu LTS รับแพตช์ความปลอดภัยจาก Ubuntu โดยตรง และติดตั้งโปรแกรมจาก `apt` ได้ทั้งหมด |
+
+## หน้าตาแบบ macOS
+
+| ส่วน | ใช้อะไร |
+|---|---|
+| แถบเมนูด้านบน | xfce4-panel: โลโก้ AprilOS (เปิดเมนูแอป) · ไอคอนหน้าต่างที่ใช้อยู่ · tray · เสียง · แจ้งเตือน · นาฬิกา |
+| Dock | Plank กึ่งกลางล่าง ขยายไอคอนเมื่อชี้เมาส์ มีถังขยะ |
+| ธีม / ไอคอน / เคอร์เซอร์ | [WhiteSur](https://github.com/vinceliuice/WhiteSur-gtk-theme) Light (หน้าล็อกอินใช้ Dark) |
+| ฟอนต์ | Inter (ภาษาไทยใช้ฟอนต์ Noto/TLWG อัตโนมัติ) |
+| หน้าต่าง | ปุ่มปิด/ย่อ/ขยายอยู่ซ้าย ชื่ออยู่กลาง มีเงา เปิดกลางจอ |
+
+| ปุ่มลัด | ทำอะไร |
+|---|---|
+| `Super` + `Space` | ค้นหาแอป (แบบ Spotlight) |
+| `Ctrl` + `Space` | สลับภาษาไทย / อังกฤษ |
+| `Super` + `Q` / `Super` + `M` | ปิด / ย่อหน้าต่าง |
+| `Shift` + `Super` + `3` / `4` | จับภาพทั้งจอ / เลือกพื้นที่ |
+
+ค่าตั้งอยู่ที่ `overlay/etc/skel/.config/` (XFCE) และ `overlay/etc/dconf/db/local.d/` (Dock) ส่วนธีมดาวน์โหลดตอน build โดย
+`overlay/usr/local/lib/aprilos/install-macos-look.sh` (ล็อกเวอร์ชันและตรวจ sha256)
+เครื่องที่อัปเดตมาจากเวอร์ชันเก่าจะได้ธีมใหม่อัตโนมัติ แต่ต้องรัน `aprilos-apply-macos-look` เพื่อเปลี่ยนแถบเมนูและ Dock ของผู้ใช้เดิม
+
+> AprilOS ไม่ได้ใช้ไฟล์ของ Apple (โลโก้, ฟอนต์ SF, ไอคอน, ภาพพื้นหลัง) เพราะเป็นลิขสิทธิ์ของ Apple — ใช้ของโอเพนซอร์สที่ออกแบบให้คล้ายแทน
 
 ## ดาวน์โหลด
 
@@ -102,6 +137,16 @@ debootstrap  ->  ติดตั้งแพ็กเกจ + branding  ->  squa
 - ต้องการไฟล์เล็กที่สุดให้ใช้ `SQUASH_COMP=xz ./build.sh` (ช้ากว่าแต่ไฟล์เล็กลง)
 
 > บน Mac Apple Silicon การ build `arm64` เร็วมากเพราะรันตรงบน CPU ส่วน `amd64` ต้องจำลอง CPU จึงใช้เวลานานกว่า
+
+**ทดสอบใน VM** (ต้องมี `qemu` เช่น `brew install qemu`)
+
+```bash
+scripts/test-vm.sh live      # บูต Live ISO แล้วถ่ายภาพหน้าจอ
+scripts/test-vm.sh install   # ติดตั้งลงดิสก์เสมือนแบบอัตโนมัติ
+scripts/test-vm.sh boot      # บูตเครื่องที่ติดตั้งแล้ว ล็อกอิน และถ่ายภาพหน้าจอ
+```
+
+ภาพหน้าจอจะอยู่ใน `out/vm/`
 
 ## ปรับแต่ง
 

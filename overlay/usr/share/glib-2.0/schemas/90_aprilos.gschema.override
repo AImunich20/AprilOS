@@ -1,0 +1,3 @@
+# AprilOS: สลับภาษาด้วย Ctrl+Space แบบ macOS (Super+Space ใช้ค้นหาแอปแทน)
+[org.freedesktop.ibus.general.hotkey]
+triggers=['<Control>space']

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# ใช้หน้าตาแบบ macOS ของ AprilOS กับผู้ใช้ปัจจุบัน (สำหรับเครื่องที่อัปเดตมาจากเวอร์ชันเก่า)
+# สำรองค่าตั้งเดิมไว้ที่ ~/.config/aprilos-backup-<วันเวลา>/ ก่อนเสมอ
+set -euo pipefail
+X=xfce4/xfconf/xfce-perchannel-xml
+BK="$HOME/.config/aprilos-backup-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$BK/$X" "$HOME/.config/$X" "$HOME/.config/autostart"
+for f in /etc/skel/.config/$X/*.xml; do
+    n=$(basename "$f"); [ -f "$HOME/.config/$X/$n" ] && cp "$HOME/.config/$X/$n" "$BK/$X/"
+done
+[ -d "$HOME/.config/plank" ] && cp -a "$HOME/.config/plank" "$BK/"
+
+# xfconfd ต้องไม่ถือค่าเก่าค้างไว้ตอนเขียนไฟล์ใหม่
+pkill -x xfconfd 2>/dev/null || true
+cp /etc/skel/.config/$X/*.xml "$HOME/.config/$X/"
+rm -rf "$HOME/.config/plank"; cp -a /etc/skel/.config/plank "$HOME/.config/"
+cp /etc/skel/.config/autostart/plank.desktop "$HOME/.config/autostart/"
+dconf reset -f /net/launchpad/plank/docks/ 2>/dev/null || true
+
+if [ -n "${DISPLAY:-}" ]; then
+    xfce4-panel -r 2>/dev/null &
+    xfwm4 --replace >/dev/null 2>&1 & disown
+    pgrep -x plank >/dev/null || (plank >/dev/null 2>&1 & disown)
+    xfdesktop --reload 2>/dev/null || true
+fi
+echo "ใช้หน้าตาแบบ macOS แล้ว (ค่าเดิมสำรองไว้ที่ $BK) — ออกจากระบบแล้วเข้าใหม่เพื่อให้มีผลครบ"

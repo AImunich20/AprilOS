@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <!-- AprilOS "Waves": ภาพพื้นหลังเริ่มต้นแบบคลื่นสีพาสเทล (ออกแบบเองสำหรับ AprilOS) -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#fbe3ee"/>
+      <stop offset="0.5" stop-color="#e9c9ee"/>
+      <stop offset="1" stop-color="#b9a4ea"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.72" cy="0.18" r="0.6">
+      <stop offset="0" stop-color="#fff4e6" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#fff4e6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="w1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7b6cf"/>
+      <stop offset="1" stop-color="#e58fb4"/>
+    </linearGradient>
+    <linearGradient id="w2" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#d79ad9"/>
+      <stop offset="1" stop-color="#a874c9"/>
+    </linearGradient>
+    <linearGradient id="w3" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0" stop-color="#8e5fc0"/>
+      <stop offset="1" stop-color="#c7609a"/>
+    </linearGradient>
+    <linearGradient id="w4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5a3a9a"/>
+      <stop offset="1" stop-color="#3b2470"/>
+    </linearGradient>
+    <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="3840" height="2160" fill="url(#sky)"/>
+  <rect width="3840" height="2160" fill="url(#sun)"/>
+
+  <path fill="url(#w1)" d="M0,980 C620,760 1180,1080 1820,930 C2460,780 3020,560 3840,700 L3840,2160 L0,2160 Z"/>
+  <path fill="url(#hl)" d="M0,980 C620,760 1180,1080 1820,930 C2460,780 3020,560 3840,700 L3840,760 C3020,640 2460,860 1820,1010 C1180,1160 620,840 0,1060 Z"/>
+
+  <path fill="url(#w2)" d="M0,1320 C540,1120 1100,1180 1700,1330 C2300,1480 3000,1180 3840,1060 L3840,2160 L0,2160 Z"/>
+  <path fill="url(#hl)" opacity="0.7" d="M0,1320 C540,1120 1100,1180 1700,1330 C2300,1480 3000,1180 3840,1060 L3840,1120 C3000,1250 2300,1550 1700,1400 C1100,1250 540,1190 0,1390 Z"/>
+
+  <path fill="url(#w3)" d="M0,1640 C700,1480 1300,1720 2000,1620 C2700,1520 3200,1400 3840,1460 L3840,2160 L0,2160 Z"/>
+  <path fill="url(#hl)" opacity="0.5" d="M0,1640 C700,1480 1300,1720 2000,1620 C2700,1520 3200,1400 3840,1460 L3840,1520 C3200,1470 2700,1590 2000,1690 C1300,1790 700,1550 0,1710 Z"/>
+
+  <path fill="url(#w4)" d="M0,1940 C800,1820 1500,2000 2300,1900 C2900,1825 3400,1800 3840,1850 L3840,2160 L0,2160 Z"/>
+</svg>

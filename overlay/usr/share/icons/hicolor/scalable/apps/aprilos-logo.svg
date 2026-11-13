@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="-64 -64 128 128">
+  <!-- โลโก้ AprilOS (ดอกไม้ 5 กลีบ) สำหรับปุ่มเมนูมุมซ้ายบน — สีเทาเข้มแบบไอคอนแถบเมนู macOS -->
+  <defs><path id="p" d="M0,-58 C30,-58 46,-22 0,8 C-46,-22 -30,-58 0,-58 Z"/></defs>
+  <g fill="#2b2b2b">
+    <use href="#p"/><use href="#p" transform="rotate(72)"/><use href="#p" transform="rotate(144)"/>
+    <use href="#p" transform="rotate(216)"/><use href="#p" transform="rotate(288)"/>
+  </g>
+  <circle r="11" fill="#ffffff"/>
+</svg>

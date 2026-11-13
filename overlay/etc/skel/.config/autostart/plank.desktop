@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Plank (Dock)
+Comment=Dock แบบ macOS ด้านล่างจอ
+Exec=plank
+Icon=plank
+Terminal=false
+X-GNOME-Autostart-enabled=true

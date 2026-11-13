@@ -36,6 +36,18 @@ network-manager-gnome
 pipewire-pulse
 wireplumber
 pavucontrol
+xfce4-pulseaudio-plugin
+xfce4-notifyd
+xfce4-screenshooter
+
+# --- หน้าตาแบบ macOS (ธีม WhiteSur ติดตั้งโดย install-macos-look.sh) ---
+plank
+fonts-inter
+gtk2-engines-murrine
+gtk2-engines-pixbuf
+gtk-update-icon-cache
+dconf-cli
+xz-utils
 
 # --- ภาษาไทย ---
 fonts-thai-tlwg

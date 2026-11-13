@@ -24,8 +24,12 @@ trap umount_chroot EXIT
 umount_chroot; rm -rf "$WORK"/*; mkdir -p "$CHROOT" "$ISO/casper" "$ISO/boot/grub" "$OUT" "$CACHE/debootstrap"
 
 echo "==> [1/5] debootstrap ${UBUNTU_CODENAME} (${ARCH})"
-debootstrap --arch="$ARCH" --variant=minbase --cache-dir="$CACHE/debootstrap" \
-    "$UBUNTU_CODENAME" "$CHROOT" "$UBUNTU_MIRROR"
+for try in 1 2 3; do   # mirror ล่มชั่วคราวได้ → ลองใหม่สูงสุด 3 ครั้ง
+    debootstrap --arch="$ARCH" --variant=minbase --cache-dir="$CACHE/debootstrap" \
+        "$UBUNTU_CODENAME" "$CHROOT" "$UBUNTU_MIRROR" && break
+    [ $try = 3 ] && exit 1
+    echo "debootstrap ล้มเหลว ลองใหม่ใน 20 วินาที ($try/3)"; sleep 20; rm -rf "$CHROOT"; mkdir -p "$CHROOT"
+done
 
 echo "==> [2/5] ปรับแต่งระบบใน chroot"
 mkdir -p "$CHROOT/tmp/aprilos"

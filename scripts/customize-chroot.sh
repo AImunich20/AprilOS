@@ -40,10 +40,12 @@ cp -a --no-preserve=ownership /tmp/aprilos/overlay/. /
 bash /usr/local/lib/aprilos/write-branding.sh /tmp/aprilos/aprilos.conf
 systemctl enable aprilos-update.timer aprilos-autoinstall.service
 chmod 755 /usr/local/sbin/* /usr/local/bin/* /usr/local/lib/aprilos/*.sh
+# หน้าตาแบบ macOS: ธีม/ไอคอน/เคอร์เซอร์ WhiteSur + ค่าเริ่มต้นของ Dock (ค่า XFCE อยู่ใน overlay/etc/skel)
+bash /usr/local/lib/aprilos/install-macos-look.sh
 echo "$HOSTNAME" > /etc/hostname
 
 # wallpaper: ชี้ภาพพื้นหลังเริ่มต้นของ XFCE มาที่ภาพของ AprilOS
-WP=/usr/share/backgrounds/aprilos/aprilos-default.svg
+WP=/usr/share/backgrounds/aprilos/aprilos-waves.svg
 for f in $(ls /usr/share/backgrounds/xfce/*.{svg,png,jpg} 2>/dev/null); do
     case "$f" in *aprilos*) ;; *) dpkg-divert --local --rename --add "$f" >/dev/null; ln -sf "$WP" "$f" ;; esac
 done

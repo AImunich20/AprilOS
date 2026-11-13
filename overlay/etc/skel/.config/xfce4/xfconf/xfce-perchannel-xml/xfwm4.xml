@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AprilOS: กรอบหน้าต่างแบบ macOS — ปุ่มปิด/ย่อ/ขยายอยู่ซ้าย ชื่อหน้าต่างอยู่กลาง มีเงา -->
+<channel name="xfwm4" version="1.0">
+  <property name="general" type="empty">
+    <property name="theme" type="string" value="WhiteSur-Light"/>
+    <property name="button_layout" type="string" value="CHM|"/>
+    <property name="title_alignment" type="string" value="center"/>
+    <property name="title_font" type="string" value="Inter Semi-Bold 10"/>
+    <property name="use_compositing" type="bool" value="true"/>
+    <property name="show_frame_shadow" type="bool" value="true"/>
+    <property name="show_popup_shadow" type="bool" value="true"/>
+    <property name="show_dock_shadow" type="bool" value="false"/>
+    <property name="placement_mode" type="string" value="center"/>
+    <property name="placement_ratio" type="int" value="100"/>
+    <property name="double_click_action" type="string" value="maximize"/>
+    <property name="workspace_count" type="int" value="1"/>
+  </property>
+</channel>
